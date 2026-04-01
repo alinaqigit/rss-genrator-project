@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: rss_generator_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-rss_generator}
+    ports:
+      - "${DB_PORT:-5544}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rss_network
+  
+  # Optional Go app container
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: rss_generator_app
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_USER: ${DB_USER:-postgres}
+  #     DB_PASSWORD: ${DB_PASSWORD:-postgres}
+  #     DB_NAME: ${DB_NAME:-rss_generator}
+  #     HOST: 0.0.0.0
+  #     PORT: 8080
+  #   ports:
+  #     - "8000:8080"
+  #   networks:
+  #     - rss_network
+
+volumes:
+  postgres_data:
+
+networks:
+  rss_network:
+    driver: bridge
