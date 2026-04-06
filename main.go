@@ -9,12 +9,13 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 
+	"github.com/alinaqigit/rss-generator-project/internal/db"
 	"github.com/joho/godotenv"
-	"github.com/alinaqigit/rss-generator-project/internal/database"
+	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
-	DB *database.Queries
+	DB *db.Queries
 }
 
 func main() {
@@ -35,10 +36,21 @@ func main() {
 		log.Fatal("DATABASE_URL is not set in the environment variables")
 	}
 	
+
+	// Opening connection to database
 	conn, err := sql.Open("postgres", DB_URL);
 	if(err != nil){
 		log.Fatal("Failed to connect to database. Err:", err);
 	}
+
+	// Getting qureies
+	queries := db.New(conn)
+
+	apiCfg := apiConfig{
+		DB: queries,
+	}
+
+	// Server
 
 	router := chi.NewRouter();
 
@@ -52,6 +64,10 @@ func main() {
 	//v1
 	v1router := chi.NewRouter()
 	v1router.Get("/healthz", handlerReadiness)
+	v1router.Get("/err", handlerErr)
+
+	v1router.Post("/user", apiCfg.handlerCreateUser)
+
 	router.Mount("/v1", v1router)
 
 	server := &http.Server{
@@ -60,7 +76,7 @@ func main() {
 	}
 
 	log.Printf("Application Starting on http://%v:%v", HOST, PORT)
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
