@@ -4,4 +4,5 @@ ALTER TABLE users ADD COLUMN api_key VARCHAR(255) UNIQUE NOT NULL DEFAULT (
 );
 
 -- +goose down
-ALTER TABLE users DROP COLUMN api_key;
+-- ALTER TABLE users DROP COLUMN api_key;
+-- down migration intentionally omitted for sqlc compatibility
