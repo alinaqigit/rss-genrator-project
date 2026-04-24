@@ -1,4 +1,4 @@
---+goose up
+-- +goose up
 
 CREATE TABLE users (
     id UUID PRIMARY KEY,
@@ -7,6 +7,6 @@ CREATE TABLE users (
     username TEXT NOT NULL UNIQUE
 );
 
---+goose down
--- DROP TABLE users;
+-- +goose Down
+DROP TABLE users;
 -- down migration intentionally omitted for sqlc compatibility

@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/alinaqigit/rss-generator-project/internal/db"
-	"github.com/alinaqigit/rss-generator-project/internal/db/auth"
 	"github.com/google/uuid"
 )
 
@@ -32,21 +31,16 @@ func (apiCfg *apiConfig) handlerCreateUser(res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	responseWithJson(res, 201, user)
+	responseWithJson(res, 201, database_user_to_User(user))
 }
 
-func (apiCfg *apiConfig) handlerGetUserByAPI(res http.ResponseWriter, req *http.Request) {
-	apiKey, err := auth.GetAPIKey(req.Header);
-	if err != nil {
-		responseWithError(res, 403, fmt.Sprintf("Auth error: %v", err))
-		return
-	}
-	
-	user, err := apiCfg.DB.GetUserByAPIKey(req.Context(), apiKey)
-	if err != nil {
-		responseWithError(res, 400, fmt.Sprintf("Couldn't get user"))
-		return
-	}
-
+func (apiCfg *apiConfig) handlerGetUserByAPI(res http.ResponseWriter, req *http.Request, user db.User) {
 	responseWithJson(res, 200, database_user_to_User(user));
+}
+
+func (apiCfg *apiConfig) handlerDeactivateUser (res http.ResponseWriter, req *http.Request, user db.User) {
+
+	apiCfg.DB.DeleteUserByAPIKey(req.Context(), user.ApiKey)
+
+	responseWithJson(res, 204, struct{}{})
 }

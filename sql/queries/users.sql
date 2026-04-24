@@ -7,3 +7,6 @@ RETURNING *;
 
 -- name: GetUserByAPIKey :one
 SELECT * FROM users WHERE api_key = $1;
+
+-- name: DeleteUserByAPIKey :exec
+DELETE FROM users WHERE api_key = $1;

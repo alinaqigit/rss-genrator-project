@@ -45,6 +45,15 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteUserByAPIKey = `-- name: DeleteUserByAPIKey :exec
+DELETE FROM users WHERE api_key = $1
+`
+
+func (q *Queries) DeleteUserByAPIKey(ctx context.Context, apiKey string) error {
+	_, err := q.db.ExecContext(ctx, deleteUserByAPIKey, apiKey)
+	return err
+}
+
 const getUserByAPIKey = `-- name: GetUserByAPIKey :one
 SELECT id, created_at, updated_at, username, api_key FROM users WHERE api_key = $1
 `

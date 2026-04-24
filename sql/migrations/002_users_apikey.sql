@@ -3,6 +3,6 @@ ALTER TABLE users ADD COLUMN api_key VARCHAR(255) UNIQUE NOT NULL DEFAULT (
   encode(sha256(random()::text::bytea), 'hex')
 );
 
--- +goose down
--- ALTER TABLE users DROP COLUMN api_key;
+-- +goose Down
+ALTER TABLE users DROP COLUMN api_key;
 -- down migration intentionally omitted for sqlc compatibility

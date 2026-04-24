@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +20,13 @@ type apiConfig struct {
 }
 
 func main() {
+
+	feed, err := urlToFeed("https://wagslane.dev/index.xml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(feed)
 
 	// load env
 	godotenv.Load()
@@ -53,7 +61,7 @@ func main() {
 	// Server
 
 	router := chi.NewRouter();
-
+	// Cors
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -61,14 +69,27 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	//v1
+	// 1. v1
 	v1router := chi.NewRouter()
 	v1router.Get("/healthz", handlerReadiness)
 	v1router.Get("/err", handlerErr)
 
 	// User
 	v1router.Post("/user", apiCfg.handlerCreateUser)
-	v1router.Get("/user", apiCfg.handlerGetUserByAPI)
+	v1router.Get("/user", apiCfg.middlewareAuth(apiCfg.handlerGetUserByAPI))
+	v1router.Delete("/user", apiCfg.middlewareAuth(apiCfg.handlerDeactivateUser))
+
+	// Feed
+	v1router.Post("/feed", apiCfg.middlewareAuth(apiCfg.handlerCreateUserFeed))
+	v1router.Get("/feed", apiCfg.handlerGetAllFeeds)
+	
+	// Feed Follow 
+	v1router.Post("/feed-follow", apiCfg.middlewareAuth(apiCfg.handlerCreateFeedFollow))
+	v1router.Get("/feed-follow", apiCfg.middlewareAuth(apiCfg.handlerGetFeedFollows))
+	v1router.Delete("/feed-follow/{feed-follow-id}", apiCfg.middlewareAuth(apiCfg.handlerDeleteFeedFollows))
+
+
+	// Server Stuff
 
 	router.Mount("/v1", v1router)
 
