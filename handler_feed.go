@@ -48,3 +48,4 @@ func (apiCfg *apiConfig) handlerGetAllFeeds(res http.ResponseWriter, req *http.R
 
 	responseWithJson(res, 200, database_feedSlice_to_FeedSlice(Feeds));
 }
+

@@ -2,10 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -20,14 +20,6 @@ type apiConfig struct {
 }
 
 func main() {
-
-	feed, err := urlToFeed("https://wagslane.dev/index.xml")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(feed)
-
 	// load env
 	godotenv.Load()
 
@@ -57,6 +49,12 @@ func main() {
 	apiCfg := apiConfig{
 		DB: queries,
 	}
+
+	// Scraping
+
+	db := db.New(conn)
+
+	go startScraping(db, 10, time.Minute)
 
 	// Server
 
@@ -88,6 +86,8 @@ func main() {
 	v1router.Get("/feed-follow", apiCfg.middlewareAuth(apiCfg.handlerGetFeedFollows))
 	v1router.Delete("/feed-follow/{feed-follow-id}", apiCfg.middlewareAuth(apiCfg.handlerDeleteFeedFollows))
 
+	// Posts
+	v1router.Get("/posts", apiCfg.middlewareAuth(apiCfg.handlerGetUserPosts))
 
 	// Server Stuff
 

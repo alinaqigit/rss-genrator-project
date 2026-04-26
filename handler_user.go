@@ -38,6 +38,20 @@ func (apiCfg *apiConfig) handlerGetUserByAPI(res http.ResponseWriter, req *http.
 	responseWithJson(res, 200, database_user_to_User(user));
 }
 
+func (apiCfg *apiConfig) handlerGetUserPosts(res http.ResponseWriter, req *http.Request, user db.User) {
+	posts, err := apiCfg.DB.GetPostsForUser(req.Context(), db.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit: 10,
+	})
+	if err != nil {
+		responseWithError(res, 400, fmt.Sprint("Couldn't get posts for user", err))
+		return
+	}
+
+	responseWithJson(res, 200, database_posts_to_Posts(posts))
+
+}
+
 func (apiCfg *apiConfig) handlerDeactivateUser (res http.ResponseWriter, req *http.Request, user db.User) {
 
 	apiCfg.DB.DeleteUserByAPIKey(req.Context(), user.ApiKey)

@@ -9,10 +9,10 @@ SELECT * FROM feeds WHERE user_id = $1;
 -- name: GetAllFeeds :many
 SELECT * FROM feeds;
 
--- name: GetNextFeedToBeFetched :one
+-- name: GetNextFeedsToBeFetched :many
 SELECT * FROM feeds
 ORDER BY last_fetched_at ASC NULLS FIRST
-LIMIT 1;
+LIMIT $1;
 
 -- name: MarkFeedAsFetched :one
 UPDATE feeds
